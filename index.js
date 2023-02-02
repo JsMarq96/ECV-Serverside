@@ -17,11 +17,11 @@ function config() {
   });
 
   // Join a conversation, and returns the state of the conversation
-  app_express.post('/join_conversation', function(req, res) {
-    chat_manager.get_users_on_convo(req.params['convo_id'],
+  app_express.get('/join_conversation', function(req, res) {
+    chat_manager.get_users_on_convo(req.query['convo_id'],
         function(users_result) {
-            chat_manager.join_convo(req.params['user_id'],
-            req.params['convo_id'],
+            chat_manager.join_convo(req.query['user_id'],
+            req.query['convo_id'],
             function() {
                  chat_manager.get_convo_history_messages(req.params['convo_id'],
                  function(msg_result){
@@ -32,8 +32,18 @@ function config() {
                    res.send(JSON.stringify(response));
                  });
             });
-    });
+        });
   });
+
+    app_express.get('/create_conversation', function(req, res) {
+      chat_manager.create_conversation(req.query['convo_id'],
+        function() {
+          var response = {};
+          response.result = 'success';
+
+          res.send(JSON.stringify(response));
+      });
+    });
 
 
   app_express.ws('/test', function(ws, req) {
