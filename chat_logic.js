@@ -41,11 +41,10 @@ var CHAT_MANAGER = {
 
     },
 
-    exit_convo: function(user_id, conversation_id, on_finish) {
-    },
-
-    send_message: function(user_id, message, on_finish) {
-
+    store_message: function(user_id, conversation_id, message, on_finish) {
+      this.redis.LPUSH(conversation_id + '_messages', message).then(function(v) {
+        on_finish();
+      });
     }
 };
 

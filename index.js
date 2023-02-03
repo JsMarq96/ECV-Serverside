@@ -4,6 +4,8 @@ var app_express = {};
 var express_ws = {};
 var chat_manager = {};
 
+var conversations_socket = {};
+
 function config() {
   // Get  conversation list
   app_express.get('/conversations_list', function(req, res) {
@@ -35,7 +37,7 @@ function config() {
         });
   });
 
-    app_express.get('/create_conversation', function(req, res) {
+  app_express.get('/create_conversation', function(req, res) {
       chat_manager.create_conversation(req.query['convo_id'],
         function() {
           var response = {};
@@ -43,15 +45,18 @@ function config() {
 
           res.send(JSON.stringify(response));
       });
-    });
+  });
 
 
-  app_express.ws('/test', function(ws, req) {
+  app_express.ws('/messages', function(ws, req) {
     ws.on('message', function(msg) {
+      // On message cases:
+      // Identity message {user_id, conversation_id}
+      var msg_obj = JSON.parse(msg);
     });
     ws.on('error', function(err) {
     });
-    console.log('new comm', JSON.stringify(ws));
+    ws.send('hi!');
   });
 
   app_express.listen(9035, function() {
@@ -65,7 +70,7 @@ function config() {
 function init() {
   var express = require('express');
   app_express = express();
-  express_ws = require('express-ws')(app_express);
+  app_express, express_ws = require('@wll8/express-ws')(app_express);
 
   console.log('Activate express and websocket');
 
