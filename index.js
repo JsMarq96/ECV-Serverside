@@ -18,8 +18,8 @@ function config() {
     });
   });
 
-  // Join a conversation, and returns the state of the conversation
-  app_express.get('/join_conversation', function(req, res) {
+  // Returns the state of the conversation: participants & history of messages
+  app_express.get('/get_conversation_data', function(req, res) {
     chat_manager.get_users_on_convo(req.query['convo_id'],
         function(users_result) {
             chat_manager.join_convo(req.query['user_id'],
@@ -53,10 +53,27 @@ function config() {
       // On message cases:
       // Identity message {user_id, conversation_id}
       var msg_obj = JSON.parse(msg);
+
+      // If it and identificaion message, stores the websocket with the user
+      // id
+      if (msg_obj.type = 'user_declaration') {
+        conversations_socket[msg_obj.name] = ws;
+      } else {
+        // Store the message
+        chat_manager.store_message(msg_obj.user_id, msg.conversation_id, msg.message, function() {
+          // Relay the message to the other people on the conversation
+          var users = chat_manager.get_users_on_convo(msg.conversation_id,
+                                                      function(user_list){
+                                                        for(var i = 0; i < user_list.length(), i++) {
+                                                          conversations_socket[user_list[i]].send(msg);
+                                                        }
+                                                      });
+        });
+      }
     });
     ws.on('error', function(err) {
+      console.log('Error on ws, probably user disconected');
     });
-    ws.send('hi!');
   });
 
   app_express.listen(9035, function() {
