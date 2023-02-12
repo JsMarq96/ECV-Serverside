@@ -16,7 +16,7 @@ var CHAT_MANAGER = {
     },
 
     create_conversations: function(conversation_name, on_finish) {
-      this.redis_client.LPUSH('conversations', conversation_id);
+      this.redis_client.LPUSH('conversations', conversation_name);
       on_finish();
     },
 
