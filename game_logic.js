@@ -61,7 +61,7 @@ var GAME_SERVER_MANAGER = {
   },
 
   remove_user: function(user_id) {
-    delete this.users[user_id];
+    delete this.active_users[user_id];
   },
 
   join_chatroom: function(user_id, room_id) {

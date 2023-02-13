@@ -1,4 +1,6 @@
 var CHAT_MANAGER = require('./chat_logic.js').chat;
+var USER_MANAGER = require('./user_manager.js').users;
+var GAME_MANAGER = require('./game_logic.js').game_server;
 
 var app_express = {};
 var express_ws = {};
@@ -51,8 +53,14 @@ function config() {
   app_express.ws('/messages', function(ws, req) {
     ws.on('message', function(msg) {
       // On message cases:
-      // Identity message {user_id, conversation_id}
       var msg_obj = JSON.parse(msg);
+
+      // Message types:
+      // - Login
+      // - Move request
+      // - Send message
+      // - Send close message
+      // - Change room
 
       // If it and identificaion message, stores the websocket with the user
       // id
@@ -73,6 +81,7 @@ function config() {
     });
     ws.on('error', function(err) {
       console.log('Error on ws, probably user disconected');
+      // TODO remove the user from the rooms
     });
   });
 
