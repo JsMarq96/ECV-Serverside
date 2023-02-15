@@ -8,7 +8,7 @@ var USER_MANAGER = {
     return this;
   },
 
-  register: function(user_name, passwd, on_finish) {
+  register_user: function(user_name, passwd, on_finish) {
      var key = 'user_' + user_name + passwd;
     this.redis_client.EXIST(key).then(function(v) {
       // If the user exists
@@ -27,9 +27,42 @@ var USER_MANAGER = {
     });
   },
 
+  register: function(token, on_finish) {
+     var key = 'user_' + token;
+    this.redis_client.EXIST(key).then(function(v) {
+      // If the user exists
+      if (v == 1) {
+        // The user already exists on the system
+        on_finish(-1);
+      } else {
+        // Get the next ID on the id_count
+        this.redis_client.INCR('id_count').then(function(new_id) {
+          // Set the user with the new ID
+          this.redis_client.SET(key, new_id).then(function(v) {
+            on_finish(new_id);
+          });
+        });
+      }
+    });
+  },
+
   // Get the user ID
-  login: function(user_name, passwd, on_finish) {
+  login_user: function(user_name, passwd, on_finish) {
     var key = 'user_' + user_name + passwd;
+    this.redis_client.EXIST(key).then(function(v) {
+      // If the user exists
+      if (v == 1) {
+        this.redis_client.GET(key).then(function(v) {
+         on_finish(v);
+        });
+      } else {
+        on_finish(-1);
+      }
+    });
+  },
+
+  login: function(hash, on_finish) {
+    var key = 'user_' + hash;
     this.redis_client.EXIST(key).then(function(v) {
       // If the user exists
       if (v == 1) {

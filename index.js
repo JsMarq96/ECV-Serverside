@@ -8,6 +8,9 @@ var chat_manager = {};
 
 var conversations_socket = {};
 
+GAME_MANAGER.init();
+USER_MANAGER.init();
+
 function config() {
   // Get  conversation list
   app_express.get('/conversations_list', function(req, res) {
@@ -50,6 +53,21 @@ function config() {
   });
 
 
+   app_express.get('/register', function(req, res) {
+     USER_MANAGER.login(req.data, function(result) {
+       if (result != -1) {
+         // User has already logged in
+         res.send(JSON.stringify({'result':'error', 'message':'User already exists on the system'}));
+       } else {
+         // Register user
+         USER_MANAGER.register(req.data, function(result_id)) {
+           res.send(JSON.stringify({'result':'success'}));
+         }
+       }
+     });
+  });
+
+  // For the ROOM ECV
   app_express.ws('/messages', function(ws, req) {
     ws.on('message', function(msg) {
       // On message cases:
@@ -62,21 +80,28 @@ function config() {
       // - Send close message
       // - Change room
 
-      // If it and identificaion message, stores the websocket with the user
-      // id
-      if (msg_obj.type = 'user_declaration') {
-        conversations_socket[msg_obj.name] = ws;
-      } else {
-        // Store the message
-        chat_manager.store_message(msg_obj.user_id, msg.conversation_id, msg.message, function() {
-          // Relay the message to the other people on the conversation
-          var users = chat_manager.get_users_on_convo(msg.conversation_id,
-                                                      function(user_list){
-                                                        for(var i = 0; i < user_list.length(), i++) {
-                                                          conversations_socket[user_list[i]].send(msg);
-                                                        }
-                                                      });
+      if (msg_obj.type.localeCompare("login") == 0) {
+        USER_MANAGER.login(msg_obj.data, function(result) {
+          // Error login in
+          if (result == -1) {
+            ws.send(JSON.stringify({'result':'error'}));
+          } else {
+            // Success login in
+            conversations_socket[result] = ws;
+            ws._user_id = result;
+            ws.send(JSON.stringify({'result':'success', 'id': result}));
+          }
         });
+      } elif (msg_obj.type.localeCompare("message") == 0) {
+
+      } elif (msg_obj.type.localeCompare("close_message") == 0) {
+
+      } elif (msg_obj.type.localeCompare("change_room") == 0) {
+
+      } elif (msg_obj.type.localeCompare("login") == 0) {
+
+      } elif (msg_obj.type.localeCompare("login") == 0) {
+
       }
     });
     ws.on('error', function(err) {
