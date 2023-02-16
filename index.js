@@ -38,7 +38,7 @@ function config() {
                    response.messages = msg_result;
                    res.send(JSON.stringify(response));
                  });
-            });
+           });
         });
   });
 
@@ -54,15 +54,16 @@ function config() {
 
 
    app_express.get('/register', function(req, res) {
+
      USER_MANAGER.login(req.data, function(result) {
        if (result != -1) {
          // User has already logged in
          res.send(JSON.stringify({'result':'error', 'message':'User already exists on the system'}));
        } else {
          // Register user
-         USER_MANAGER.register(req.data, function(result_id)) {
+         USER_MANAGER.register(req.data, function(result_id) {
            res.send(JSON.stringify({'result':'success'}));
-         }
+         });
        }
      });
   });
@@ -84,33 +85,35 @@ function config() {
         USER_MANAGER.login(msg_obj.data, function(result) {
           // Error login in
           if (result == -1) {
-            ws.send(JSON.stringify({'result':'error'}));
+            ws.send(JSON.stringify({'type':'error'}));
           } else {
             // Success login in
             ws._user_id = result;
             conversations_socket[result] = ws;
 
+            GAME_MANAGER.join_chatroom(result, GAME_MANAGER.starting_room);
+
             // Send the room data
-            ws.send(JSON.stringify({'result':'success', 'id': result}));
+            ws.send(JSON.stringify({'type':'logged_in', 'id': result, 'room': GAME_MANAGER.rooms[GAME_MANAGER.starting_room]}));
           }
         });
-      } elif (msg_obj.type.localeCompare("message") == 0) {
+      } else if (msg_obj.type.localeCompare("message") == 0) {
         var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.room_users[ws._user_id]);
 
         for(var i = 0; i  < user_ids.length; i++) {
-          conversations_socket[i].send(JSON.stringify({'type':'message', msg_obj.data}));
+          conversations_socket[i].send(JSON.stringify({'type':'message', 'message':msg_obj.data}));
         }
-      } elif (msg_obj.type.localeCompare("close_message") == 0) {
+      } else if (msg_obj.type.localeCompare("close_message") == 0) {
         var user_ids = GAME_MANAGER.get_users_id_on_chatroom_near_me(GAME_MANAGER.room_users[ws._user_id], ws._user_id, 200);
 
         for(var i = 0; i  < user_ids.length; i++) {
-          conversations_socket[i].send(JSON.stringify({'type':'message', msg_obj.data}));
+          conversations_socket[i].send(JSON.stringify({'type':'message', 'message':msg_obj.data}));
         }
-      } elif (msg_obj.type.localeCompare("change_room") == 0) {
+      } else if (msg_obj.type.localeCompare("change_room") == 0) {
 
-      } elif (msg_obj.type.localeCompare("updated_position") == 0) {
+      } else if (msg_obj.type.localeCompare("updated_position") == 0) {
 
-      } elif (msg_obj.type.localeCompare("move_towards") == 0) {
+      } else if (msg_obj.type.localeCompare("move_towards") == 0) {
 
       }
     });

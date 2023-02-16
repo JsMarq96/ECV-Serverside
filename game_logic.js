@@ -1,9 +1,14 @@
 var GAME_SERVER_MANAGER = {
 
   init: function() {
-    this.rooms = {};
-    this.user_room_id = {};
-    return this;
+    GAME_SERVER_MANAGER.rooms = {};
+    GAME_SERVER_MANAGER.user_room_id = {};
+
+    // Config default room structure
+    GAME_SERVER_MANAGER.starting_room = "main_lobby";
+    GAME_SERVER_MANAGER.add_room(GAME_SERVER_MANAGER.starting_room, "imgs/jainine-heese-lobby.png", 0.0);
+
+    return GAME_SERVER_MANAGER;
   },
 
   room_template: {
@@ -18,20 +23,21 @@ var GAME_SERVER_MANAGER = {
     item_on_hand: {}
   },
 
-  add_room: function(name, back_img) {
-    var room_obj = {... this.room_template};
+  add_room: function(name, back_img, starting_pos) {
+    var room_obj = {... GAME_SERVER_MANAGER.room_template};
 
     room_obj.back_img = back_img;
+    room_obj.start_position = starting_pos;
 
-    this.rooms[name] = room_obj;
+    GAME_SERVER_MANAGER.rooms[name] = room_obj;
   },
 
 
   get_users_on_chatroom: function(room_id, on_finish) {
-    return this.rooms[room_id].users;
+    return GAME_SERVER_MANAGER.rooms[room_id].users;
   },
   get_users_id_on_chatroom: function(room_id) {
-    var room_users = this.rooms[room_id].users;
+    var room_users = GAME_SERVER_MANAGER.rooms[room_id].users;
     var user_id_list = [];
 
     for(var i = 0; i < room_users.length; i++) {
@@ -42,7 +48,7 @@ var GAME_SERVER_MANAGER = {
   },
 
   get_users_ids_on_chatroom_near_me: function(room_id, user_id, distance) {
-    var room_users = this.rooms[room_id].users;
+    var room_users = GAME_SERVER_MANAGER.rooms[room_id].users;
     var user_pos = null;
     var near_user_id_list = [];
     // Find the current user's position
@@ -69,11 +75,11 @@ var GAME_SERVER_MANAGER = {
   },
 
   add_user: function(user_id) {
-    this.users[user_id] = {... self.user_template};
+    GAME_SERVER_MANAGER.users[user_id] = {... self.user_template};
   },
 
   remove_user: function(user_id, room_id) {
-    var room_users = this.rooms[room_id].users;
+    var room_users = GAME_SERVER_MANAGER.rooms[room_id].users;
 
     // Find the user's position
     for(var i = 0; i < room_users.length; i++) {
@@ -84,28 +90,28 @@ var GAME_SERVER_MANAGER = {
   },
 
   join_chatroom: function(user_id, room_id) {
-    var new_user = { ... this.user_template}
+    var new_user = { ... GAME_SERVER_MANAGER.user_template}
     new_user.id = user_id;
-    new_user.position.x = this.rooms[room_id].start_position;
-    this.room_users[user_id] = room_id;
-    this.rooms[room_id].users.push(new_user);
+    new_user.position.x = GAME_SERVER_MANAGER.rooms[room_id].start_position;
+    GAME_SERVER_MANAGER.user_room_id[user_id] = room_id;
+    GAME_SERVER_MANAGER.rooms[room_id].users.push(new_user);
   },
 
   move_chatroom: function(user_id, old_room, new_room) {
-    var room_users = this.rooms[old_room].users;
+    var room_users = GAME_SERVER_MANAGER.rooms[old_room].users;
     // Find the user's position
     for(var i = 0; i < room_users.length; i++) {
       if (room_users[i].id == user_id) {
-        room_users[i].position.x = this.rooms[new_room].start_position;
+        room_users[i].position.x = GAME_SERVER_MANAGER.rooms[new_room].start_position;
 
-        this.rooms[new_room].users.push({...room_users[i]});
+        GAME_SERVER_MANAGER.rooms[new_room].users.push({...room_users[i]});
         delete room_users[i];
       }
     }
 
-    this.room_users[user_id] = new_room;
+    GAME_SERVER_MANAGER.room_users[user_id] = new_room;
 
-    return this.rooms[new_room];
+    return GAME_SERVER_MANAGER.rooms[new_room];
   }
 };
 
