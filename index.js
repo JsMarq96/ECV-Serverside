@@ -118,8 +118,15 @@ function config() {
       }
     });
     ws.on('error', function(err) {
-      console.log('Error on ws, probably user disconected');
+      console.log('Error on ws');
       // TODO remove the user from the rooms
+      GAME_MANAGER.remove_user(ws._user_id, GAME_MANAGER.user_room_id[ws._user_id]);
+    });
+
+    ws.on('close', function(err) {
+      console.log('User disconected');
+      // TODO remove the user from the rooms
+      GAME_MANAGER.remove_user(ws._user_id, GAME_MANAGER.user_room_id[ws._user_id]);
     });
   });
 

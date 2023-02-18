@@ -26,6 +26,7 @@ var GAME_SERVER_MANAGER = {
   add_room: function(name, back_img, starting_pos) {
     var room_obj = {... GAME_SERVER_MANAGER.room_template};
 
+    room_obj.name = name;
     room_obj.back_img = back_img;
     room_obj.start_position = starting_pos;
 
@@ -84,7 +85,7 @@ var GAME_SERVER_MANAGER = {
     // Find the user's position
     for(var i = 0; i < room_users.length; i++) {
       if (room_users[i].id == user_id) {
-        delete room_users[i];
+        room_users.splice(i, 1); // Remove user
       }
     }
   },
@@ -105,7 +106,7 @@ var GAME_SERVER_MANAGER = {
         room_users[i].position.x = GAME_SERVER_MANAGER.rooms[new_room].start_position;
 
         GAME_SERVER_MANAGER.rooms[new_room].users.push({...room_users[i]});
-        delete room_users[i];
+        room_users.splice(i, 1);
       }
     }
 
