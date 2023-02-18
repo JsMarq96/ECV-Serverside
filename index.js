@@ -98,23 +98,31 @@ function config() {
           }
         });
       } else if (msg_obj.type.localeCompare("message") == 0) {
-        var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.room_users[ws._user_id]);
+        var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.user_room_id[ws._user_id]);
 
         for(var i = 0; i  < user_ids.length; i++) {
-          conversations_socket[i].send(JSON.stringify({'type':'message', 'message':msg_obj.data}));
+          conversations_socket[user_ids[i]].send(JSON.stringify({'type':'new_message', 'from': ws._user_id, 'message':msg_obj.message}));
         }
       } else if (msg_obj.type.localeCompare("close_message") == 0) {
-        var user_ids = GAME_MANAGER.get_users_id_on_chatroom_near_me(GAME_MANAGER.room_users[ws._user_id], ws._user_id, 200);
+        var user_ids = GAME_MANAGER.get_users_id_on_chatroom_near_me(GAME_MANAGER.user_room_id[ws._user_id], ws._user_id, 200);
 
         for(var i = 0; i  < user_ids.length; i++) {
-          conversations_socket[i].send(JSON.stringify({'type':'message', 'message':msg_obj.data}));
+          conversations_socket[user_ids[i]].send(JSON.stringify({'type':'new_message', 'message':msg_obj.message}));
         }
       } else if (msg_obj.type.localeCompare("change_room") == 0) {
 
       } else if (msg_obj.type.localeCompare("updated_position") == 0) {
+        // Update the position on the server, and then send the positions to the users
+        // that are in teh same room, to their sockets
+        GAME_MANAGER.set_user_position(ws._user_id, msg_obj.position);
+        var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.user_room_id[ws._user_id]);
+        var obj = {'type':'move_character', 'user_id': ws._user_id, 'position': msg_obj.position};
 
-      } else if (msg_obj.type.localeCompare("move_towards") == 0) {
+        var result_msg = JSON.stringify(obj);
 
+        for(var i = 0; i < user_ids.length; i++) {
+          conversations_socket[user_ids[i]].send(result_msg);
+        }
       }
     });
     ws.on('error', function(err) {

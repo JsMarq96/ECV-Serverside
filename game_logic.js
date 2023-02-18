@@ -23,6 +23,15 @@ var GAME_SERVER_MANAGER = {
     item_on_hand: {}
   },
 
+  set_user_position: function(user_id, new_position) {
+    var room = GAME_SERVER_MANAGER.rooms[GAME_SERVER_MANAGER.user_room_id[user_id]];
+    var room_users = room.users;
+
+     for(var i = 0; i < room_users.length; i++) {
+       room_users[i].position.x = new_position;
+    }
+  },
+
   add_room: function(name, back_img, starting_pos) {
     var room_obj = {... GAME_SERVER_MANAGER.room_template};
 
