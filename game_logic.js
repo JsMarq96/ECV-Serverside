@@ -47,6 +47,9 @@ var GAME_SERVER_MANAGER = {
     return GAME_SERVER_MANAGER.rooms[room_id].users;
   },
   get_users_id_on_chatroom: function(room_id) {
+    if (!GAME_SERVER_MANAGER.rooms.hasOwnProperty(room_id)) {
+      return;
+    }
     var room_users = GAME_SERVER_MANAGER.rooms[room_id].users;
     var user_id_list = [];
 
@@ -89,6 +92,10 @@ var GAME_SERVER_MANAGER = {
   },
 
   remove_user: function(user_id, room_id) {
+    if (!GAME_SERVER_MANAGER.rooms.hasOwnProperty(room_id)) {
+      return;
+    }
+    console.log(room_id, user_id);
     var room_users = GAME_SERVER_MANAGER.rooms[room_id].users;
 
     // Find the user's position

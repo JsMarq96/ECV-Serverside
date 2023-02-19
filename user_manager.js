@@ -68,7 +68,6 @@ var USER_MANAGER = {
       // If the user exists
       if (v == 1) {
         USER_MANAGER.redis_client.get(key).then(function(v) {
-          console.log(v);
          on_finish(v);
         });
       } else {
