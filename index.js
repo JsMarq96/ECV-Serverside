@@ -93,14 +93,12 @@ function config() {
 
             var current_users_in_room = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.starting_room);
 
-            GAME_MANAGER.join_chatroom(result, GAME_MANAGER.starting_room, msg_obj.style);
-
-            console.log("rere", current_users_in_room);
+            GAME_MANAGER.join_chatroom(result, GAME_MANAGER.starting_room, msg_obj.name, msg_obj.style);
 
             // Send the room data
             ws.send(JSON.stringify({'type':'logged_in', 'id': result, 'style':msg_obj.style, 'room': GAME_MANAGER.rooms[GAME_MANAGER.starting_room]}));
 
-            var new_user_obj = JSON.stringify({'type': 'new_character', 'style':msg_obj.style, 'user_id': result, 'position_x': 0.0});
+            var new_user_obj = JSON.stringify({'type': 'new_character', 'style':msg_obj.style, 'name': msg_obj.name, 'user_id': result, 'position_x': 0.0});
             // Send to the other users in the room
             for(var i = 0; i < current_users_in_room.length; i++) {
               conversations_socket[current_users_in_room[i]].send(new_user_obj);
@@ -126,16 +124,18 @@ function config() {
           }
         });
       } else if (msg_obj.type.localeCompare("message") == 0) {
+        // RECIVED GLOBAL MESSAGE
         var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.user_room_id[ws._user_id]);
-
+        var new_message_obj = JSON.stringify({'type':'new_message', 'from': ws._user_id, 'from_name': GAME_MANAGER.user_id_name[ws._user_id], 'message':msg_obj.message});
         for(var i = 0; i  < user_ids.length; i++) {
-          conversations_socket[user_ids[i]].send(JSON.stringify({'type':'new_message', 'from': ws._user_id, 'message':msg_obj.message}));
+          conversations_socket[user_ids[i]].send(new_message_obj);
         }
       } else if (msg_obj.type.localeCompare("close_message") == 0) {
         var user_ids = GAME_MANAGER.get_users_id_on_chatroom_near_me(GAME_MANAGER.user_room_id[ws._user_id], ws._user_id, 200);
 
+        var new_message_obj = JSON.stringify({'type':'new_message', 'from': ws._user_id, 'from_name': GAME_MANAGER.user_id_name[ws._user_id], 'message':msg_obj.message});
         for(var i = 0; i  < user_ids.length; i++) {
-          conversations_socket[user_ids[i]].send(JSON.stringify({'type':'new_message', 'message':msg_obj.message}));
+          conversations_socket[user_ids[i]].send(new_message_obj);
         }
       } else if (msg_obj.type.localeCompare("change_room") == 0) {
 
@@ -166,11 +166,12 @@ function config() {
 
       // Send the discoenct message to the other users on the room
       var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.user_room_id[ws._user_id]);
-      console.log(user_ids, ws._user_id);
-      var msg_obj = JSON.stringify({'type':'user_disconnect', 'user_id': ws._user_id});
-      for(var i = 0; i < user_ids.length; i++) {
+      if (user_ids != null) {
+        var msg_obj = JSON.stringify({'type':'user_disconnect', 'user_id': ws._user_id});
+        for(var i = 0; i < user_ids.length; i++) {
           conversations_socket[user_ids[i]].send(msg_obj);
         }
+      }
     });
   });
 

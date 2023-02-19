@@ -3,6 +3,7 @@ var GAME_SERVER_MANAGER = {
   init: function() {
     GAME_SERVER_MANAGER.rooms = {};
     GAME_SERVER_MANAGER.user_room_id = {};
+    GAME_SERVER_MANAGER.user_id_name = {};
 
     // Config default room structure
     GAME_SERVER_MANAGER.starting_room = "main_lobby";
@@ -111,13 +112,15 @@ var GAME_SERVER_MANAGER = {
     }
   },
 
-  join_chatroom: function(user_id, room_id, style) {
+  join_chatroom: function(user_id, room_id, name, style) {
     var new_user = { ... GAME_SERVER_MANAGER.user_template}
     new_user.id = user_id;
     new_user.position = GAME_SERVER_MANAGER.rooms[room_id].start_position;
+    new_user.name = name;
     new_user.style = style;
     GAME_SERVER_MANAGER.user_room_id[user_id] = room_id;
     GAME_SERVER_MANAGER.rooms[room_id].users.push(new_user);
+    GAME_SERVER_MANAGER.user_id_name[user_id] = name;
   },
 
   move_chatroom: function(user_id, old_room, new_room) {
