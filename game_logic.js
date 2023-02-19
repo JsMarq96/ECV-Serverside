@@ -19,7 +19,7 @@ var GAME_SERVER_MANAGER = {
 
   user_template: {
     id: 0,
-    position: {x: 0, y: 0},
+    position: 0,
     item_on_hand: {}
   },
 
@@ -28,8 +28,12 @@ var GAME_SERVER_MANAGER = {
     var room_users = room.users;
 
      for(var i = 0; i < room_users.length; i++) {
-       room_users[i].position.x = new_position;
-    }
+       if (user_id.localeCompare(room_users[i].id) == 0) {
+         room_users[i].position = new_position;
+         break;
+       }
+     }
+    console.log(user_id, JSON.stringify(GAME_SERVER_MANAGER.rooms));
   },
 
   add_room: function(name, back_img, starting_pos) {
@@ -67,7 +71,7 @@ var GAME_SERVER_MANAGER = {
     // Find the current user's position
     for(var i = 0; i < room_users.length; i++) {
       if (room_users[i].id == user_id) {
-        user_pos = room_users[i].position.x;
+        user_pos = room_users[i].position;
       }
     }
 
@@ -79,7 +83,7 @@ var GAME_SERVER_MANAGER = {
       }
 
       // If its near, or less the max distance, add to the list
-      if (Math.abs(room_users[i].position.x - user_pos) < distance) {
+      if (Math.abs(room_users[i].position - user_pos) < distance) {
         near_user_id_list.push(room_users[i].id);
       }
     }
@@ -87,8 +91,9 @@ var GAME_SERVER_MANAGER = {
     return near_user_id_list;
   },
 
-  add_user: function(user_id) {
+  add_user: function(user_id, style) {
     GAME_SERVER_MANAGER.users[user_id] = {... self.user_template};
+    GAME_SERVER_MANAGER.users[user_id].style = style;
   },
 
   remove_user: function(user_id, room_id) {
@@ -106,10 +111,11 @@ var GAME_SERVER_MANAGER = {
     }
   },
 
-  join_chatroom: function(user_id, room_id) {
+  join_chatroom: function(user_id, room_id, style) {
     var new_user = { ... GAME_SERVER_MANAGER.user_template}
     new_user.id = user_id;
-    new_user.position.x = GAME_SERVER_MANAGER.rooms[room_id].start_position;
+    new_user.position = GAME_SERVER_MANAGER.rooms[room_id].start_position;
+    new_user.style = style;
     GAME_SERVER_MANAGER.user_room_id[user_id] = room_id;
     GAME_SERVER_MANAGER.rooms[room_id].users.push(new_user);
   },
@@ -119,7 +125,7 @@ var GAME_SERVER_MANAGER = {
     // Find the user's position
     for(var i = 0; i < room_users.length; i++) {
       if (room_users[i].id == user_id) {
-        room_users[i].position.x = GAME_SERVER_MANAGER.rooms[new_room].start_position;
+        room_users[i].position = GAME_SERVER_MANAGER.rooms[new_room].start_position;
 
         GAME_SERVER_MANAGER.rooms[new_room].users.push({...room_users[i]});
         room_users.splice(i, 1);
