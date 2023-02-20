@@ -7,6 +7,7 @@ var express_ws = {};
 var chat_manager = {};
 
 var conversations_socket = {};
+var chat_conversation_socket= {};
 
 GAME_MANAGER.init();
 USER_MANAGER.init();
@@ -66,6 +67,48 @@ function config() {
          });
        }
      });
+  });
+
+  // WS Endpoint for the chat
+  app_express.ws('/chat', function(ws, req) {
+    ws.on('message', function(msg) {
+      // On message cases:
+      var msg_obj = JSON.parse(msg);
+
+      if (msg_obj.type.localeCompare("login") == 0) {
+        USER_MANAGER.login('chat_' + msg_obj.data, function(result) {
+          if (result == -1) {
+            ws.send(JSON.stringify({'type':'login_error', 'msg':'Error with user-password convo'}));
+          } else {
+
+            if (result in chat_conversations_socket) {
+              // There is already an user logged in
+              ws.send(JSON.stringify({'type':'login_error', 'msg':'User already logged in'}));
+            } else {
+              // Success login in
+              ws._user_id = result;
+              conversations_socket[result] = ws;
+
+
+              // Send the room data
+              ws.send(JSON.stringify({'type':'logged_in',
+                                      'id': result,
+                                      'style':msg_obj.style,
+                                      'room': GAME_MANAGER.rooms[GAME_MANAGER.starting_room]}));
+
+              var new_user_obj = JSON.stringify({'type': 'new_character',
+                                                 'style':msg_obj.style,
+                                                 'name': msg_obj.name,
+                                                 'user_id': result,
+                                                 'position_x': 0.0});
+              // Send to the other users in the room
+              for(var i = 0; i < current_users_in_room.length; i++) {
+                chat_conversations_socket[current_users_in_room[i]].send(new_user_obj);
+              }
+            }
+          }
+        });
+      }});
   });
 
   // For the ROOM ECV
@@ -142,7 +185,8 @@ function config() {
         var new_message_obj = JSON.stringify({'type':'new_message',
                                               'from': ws._user_id,
                                               'from_name': GAME_MANAGER.user_id_name[ws._user_id],
-                                              'message':msg_obj.message});
+                                              'message':msg_obj.message,
+                                              'style': GAME_MANAGER.user_id_styles[ws._user_id]});
         for(var i = 0; i  < user_ids.length; i++) {
           conversations_socket[user_ids[i]].send(new_message_obj);
         }
@@ -157,10 +201,11 @@ function config() {
           conversations_socket[user_ids[i]].send(new_message_obj);
         }
       } else if (msg_obj.type.localeCompare("change_room") == 0) {
-
+        // Get users list and references ofr sending the new user's state
         var old_room = GAME_MANAGER.user_room_id[ws._user_id];
         var users_in_new_room = GAME_MANAGER.get_users_id_on_chatroom(msg_obj.new_room);
 
+        // Change the user
         GAME_MANAGER.move_chatroom(ws._user_id, old_room, msg_obj.new_room);
 
         ws.send(JSON.stringify({'type':'move_to_room',
@@ -168,7 +213,6 @@ function config() {
                                 'new_room': GAME_MANAGER.rooms[msg_obj.new_room]}));
 
         var users_in_old_room = GAME_MANAGER.get_users_id_on_chatroom(old_room);
-        console.log(users_in_old_room, '====');
 
         var user_exited_message = JSON.stringify({'type': 'user_gone_to_room',
                                                   'user_name': GAME_MANAGER.user_id_name[ws._user_id],
@@ -179,18 +223,8 @@ function config() {
           conversations_socket[users_in_old_room[i]].send(user_exited_message);
         }
 
-        // Get the style... very awful
-        var room_tmp = GAME_MANAGER.rooms[GAME_MANAGER.user_room_id[ws._user_id]].users;
-        var user_obj = null;
-        for(var i = 0; i < room_tmp.length; i++) {
-          if (ws._user_id.localeCompare(room_tmp[i].id) == 0) {
-            user_obj = room_tmp[i];
-            break;
-          }
-        }
-
         var new_user_obj = JSON.stringify({'type': 'new_character',
-                                           'style': user_obj.style,
+                                           'style': GAME_MANAGER.user_id_styles[ws._user_id],
                                            'name': GAME_MANAGER.user_id_name[ws._user_id],
                                            'user_id': ws._user_id,
                                            'position_x': 0.0});
