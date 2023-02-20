@@ -8,6 +8,12 @@ var GAME_SERVER_MANAGER = {
     // Config default room structure
     GAME_SERVER_MANAGER.starting_room = "main_lobby";
     GAME_SERVER_MANAGER.add_room(GAME_SERVER_MANAGER.starting_room, "imgs/jainine-heese-lobby.png", 0.0);
+    GAME_SERVER_MANAGER.add_room("room_1", "imgs/jainine-heese-room1.png", 0.0);
+    GAME_SERVER_MANAGER.add_room("room_2", "imgs/jainine-heese-room2.png", 0.0);
+
+    //DORS
+    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_1", -359, -111);
+    // -359 -111
 
     return GAME_SERVER_MANAGER;
   },
@@ -15,7 +21,8 @@ var GAME_SERVER_MANAGER = {
   room_template: {
     users:[],
     back_img: '',
-    start_position: 0.0
+    start_position: 0.0,
+    doors:[]
   },
 
   user_template: {
@@ -26,6 +33,9 @@ var GAME_SERVER_MANAGER = {
 
   set_user_position: function(user_id, new_position) {
     var room = GAME_SERVER_MANAGER.rooms[GAME_SERVER_MANAGER.user_room_id[user_id]];
+    if (room == null) {
+      return;
+    }
     var room_users = room.users;
 
      for(var i = 0; i < room_users.length; i++) {
@@ -34,7 +44,12 @@ var GAME_SERVER_MANAGER = {
          break;
        }
      }
-    console.log(user_id, JSON.stringify(GAME_SERVER_MANAGER.rooms));
+  },
+
+  add_door_to_room: function(starting_room, other_side_room, pos_x, pos_y) {
+    GAME_SERVER_MANAGER.rooms[starting_room].doors.push({'to': other_side_room,
+                                                   'pos_x': pos_x,
+                                                   'pos_y':pos_y });
   },
 
   add_room: function(name, back_img, starting_pos) {
