@@ -12,7 +12,7 @@ var GAME_SERVER_MANAGER = {
     GAME_SERVER_MANAGER.add_room("room_2", "imgs/jainine-heese-room2.png", 0.0);
 
     //DORS
-    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_1", -359, -111);
+    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_1", -359, 38);
     // -359 -111
 
     return GAME_SERVER_MANAGER;
