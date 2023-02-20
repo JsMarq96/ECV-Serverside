@@ -29,6 +29,7 @@ var USER_MANAGER = {
 
   register: function(token, on_finish) {
      var key = 'user_' + token;
+     console.log("Register attempt: ", key);
     USER_MANAGER.redis_client.EXISTS(key).then(function(v) {
       // If the user exists
       if (v == 1) {
@@ -63,6 +64,7 @@ var USER_MANAGER = {
 
   login: function(hash, on_finish) {
     var key = 'user_' + hash;
+    console.log("Login attempt: ", key);
 
     USER_MANAGER.redis_client.EXISTS(key).then(function(v) {
       // If the user exists

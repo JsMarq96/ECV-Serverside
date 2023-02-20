@@ -85,30 +85,36 @@ function config() {
         USER_MANAGER.login(msg_obj.data, function(result) {
           // Error login in
           if (result == -1) {
-            ws.send(JSON.stringify({'type':'login_error'}));
+            ws.send(JSON.stringify({'type':'login_error', 'msg':'Error with user-password convo'}));
           } else {
-            // Success login in
-            ws._user_id = result;
-            conversations_socket[result] = ws;
 
-            var current_users_in_room = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.starting_room);
+            if (result in conversations_socket) {
+              // There is already an user logged in
+              ws.send(JSON.stringify({'type':'login_error', 'msg':'User already logged in'}));
+            } else {
+              // Success login in
+              ws._user_id = result;
+              conversations_socket[result] = ws;
 
-            GAME_MANAGER.join_chatroom(result, GAME_MANAGER.starting_room, msg_obj.name, msg_obj.style);
+              var current_users_in_room = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.starting_room);
 
-            // Send the room data
-            ws.send(JSON.stringify({'type':'logged_in',
-                                    'id': result,
-                                    'style':msg_obj.style,
-                                    'room': GAME_MANAGER.rooms[GAME_MANAGER.starting_room]}));
+              GAME_MANAGER.join_chatroom(result, GAME_MANAGER.starting_room, msg_obj.name, msg_obj.style);
 
-            var new_user_obj = JSON.stringify({'type': 'new_character',
-                                               'style':msg_obj.style,
-                                               'name': msg_obj.name,
-                                               'user_id': result,
-                                               'position_x': 0.0});
-            // Send to the other users in the room
-            for(var i = 0; i < current_users_in_room.length; i++) {
-              conversations_socket[current_users_in_room[i]].send(new_user_obj);
+              // Send the room data
+              ws.send(JSON.stringify({'type':'logged_in',
+                                      'id': result,
+                                      'style':msg_obj.style,
+                                      'room': GAME_MANAGER.rooms[GAME_MANAGER.starting_room]}));
+
+              var new_user_obj = JSON.stringify({'type': 'new_character',
+                                                 'style':msg_obj.style,
+                                                 'name': msg_obj.name,
+                                                 'user_id': result,
+                                                 'position_x': 0.0});
+              // Send to the other users in the room
+              for(var i = 0; i < current_users_in_room.length; i++) {
+                conversations_socket[current_users_in_room[i]].send(new_user_obj);
+              }
             }
           }
         });
@@ -218,6 +224,9 @@ function config() {
 
     ws.on('close', function(err) {
       console.log('User disconected');
+
+      // Remove the user's stored websocket
+      delete conversations_socket[ws._user_id];
       // Remove the user from the rooms
       GAME_MANAGER.remove_user(ws._user_id, GAME_MANAGER.user_room_id[ws._user_id]);
 
