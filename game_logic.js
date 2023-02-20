@@ -4,6 +4,7 @@ var GAME_SERVER_MANAGER = {
     GAME_SERVER_MANAGER.rooms = {};
     GAME_SERVER_MANAGER.user_room_id = {};
     GAME_SERVER_MANAGER.user_id_name = {};
+    GAME_SERVER_MANAGER.user_id_styles = {};
 
     // Config default room structure
     GAME_SERVER_MANAGER.starting_room = "main_lobby";
@@ -140,6 +141,7 @@ var GAME_SERVER_MANAGER = {
     GAME_SERVER_MANAGER.user_room_id[user_id] = room_id;
     GAME_SERVER_MANAGER.rooms[room_id].users.push(new_user);
     GAME_SERVER_MANAGER.user_id_name[user_id] = name;
+    GAME_SERVER_MANAGER.user_id_styles[user_id] = style;
   },
 
   move_chatroom: function(user_id, old_room, new_room) {
