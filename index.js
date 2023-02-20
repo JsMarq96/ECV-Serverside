@@ -167,7 +167,7 @@ function config() {
       // Send the discoenct message to the other users on the room
       var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.user_room_id[ws._user_id]);
       if (user_ids != null) {
-        var msg_obj = JSON.stringify({'type':'user_disconnect', 'user_id': ws._user_id});
+        var msg_obj = JSON.stringify({'type':'user_disconnect', 'name': GAME_MANAGER.user_id_name[ws._user_id], 'user_id': ws._user_id});
         for(var i = 0; i < user_ids.length; i++) {
           conversations_socket[user_ids[i]].send(msg_obj);
         }
