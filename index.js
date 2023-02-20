@@ -152,24 +152,61 @@ function config() {
         }
       } else if (msg_obj.type.localeCompare("change_room") == 0) {
 
-        var new_room = GAME_MANAGER.move_chatroom(ws._user_id, GAME_MANAGER.user_room_id[ws._user_id], msg_obj.new_room);
+        var old_room = GAME_MANAGER.user_room_id[ws._user_id];
+        var users_in_new_room = GAME_MANAGER.get_users_id_on_chatroom(msg_obj.new_room);
+
+        GAME_MANAGER.move_chatroom(ws._user_id, old_room, msg_obj.new_room);
 
         ws.send(JSON.stringify({'type':'move_to_room',
                                 'new_room_id': msg_obj.new_room,
-                                'new_room': new_room}));
+                                'new_room': GAME_MANAGER.rooms[msg_obj.new_room]}));
+
+        var users_in_old_room = GAME_MANAGER.get_users_id_on_chatroom(old_room);
+        console.log(users_in_old_room, '====');
+
+        var user_exited_message = JSON.stringify({'type': 'user_gone_to_room',
+                                                  'user_name': GAME_MANAGER.user_id_name[ws._user_id],
+                                                  'user_id': ws._user_id,
+                                                  'new_room': msg_obj.new_room});
+
+        for(var i = 0; i < users_in_old_room.length; i++) {
+          conversations_socket[users_in_old_room[i]].send(user_exited_message);
+        }
+
+        // Get the style... very awful
+        var room_tmp = GAME_MANAGER.rooms[GAME_MANAGER.user_room_id[ws._user_id]].users;
+        var user_obj = null;
+        for(var i = 0; i < room_tmp.length; i++) {
+          if (ws._user_id.localeCompare(room_tmp[i].id) == 0) {
+            user_obj = room_tmp[i];
+            break;
+          }
+        }
+
+        var new_user_obj = JSON.stringify({'type': 'new_character',
+                                           'style': user_obj.style,
+                                           'name': GAME_MANAGER.user_id_name[ws._user_id],
+                                           'user_id': ws._user_id,
+                                           'position_x': 0.0});
+        for(var i = 0; i < users_in_new_room.length; i++) {
+          conversations_socket[users_in_new_room[i]].send(new_user_obj);
+        }
       } else if (msg_obj.type.localeCompare("updated_position") == 0) {
         // Update the position on the server, and then send the positions to the users
         // that are in teh same room, to their sockets
         GAME_MANAGER.set_user_position(ws._user_id, msg_obj.position);
         var user_ids = GAME_MANAGER.get_users_id_on_chatroom(GAME_MANAGER.user_room_id[ws._user_id]);
-        var obj = {'type':'move_character',
-                   'user_id': ws._user_id,
-                   'position': msg_obj.position};
 
-        var result_msg = JSON.stringify(obj);
+        if (user_ids != null) {
+          var obj = {'type':'move_character',
+                     'user_id': ws._user_id,
+                     'position': msg_obj.position};
 
-        for(var i = 0; i < user_ids.length; i++) {
-          conversations_socket[user_ids[i]].send(result_msg);
+          var result_msg = JSON.stringify(obj);
+
+          for(var i = 0; i < user_ids.length; i++) {
+            conversations_socket[user_ids[i]].send(result_msg);
+          }
         }
       }
     });

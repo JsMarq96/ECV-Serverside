@@ -9,11 +9,13 @@ var GAME_SERVER_MANAGER = {
     GAME_SERVER_MANAGER.starting_room = "main_lobby";
     GAME_SERVER_MANAGER.add_room(GAME_SERVER_MANAGER.starting_room, "imgs/jainine-heese-lobby.png", 0.0);
     GAME_SERVER_MANAGER.add_room("room_1", "imgs/jainine-hesee-room1.png", 0.0);
-    GAME_SERVER_MANAGER.add_room("room_2", "imgs/jainine-hesee-room2.png", 0.0);
+    GAME_SERVER_MANAGER.add_room("room_2", "imgs/janine-hesee-room2.png", 0.0);
 
-    //DORS
-    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_1", -359, 38);
-    // -359 -111
+    // DOORS
+    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_1", -359, 78);
+    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_2", -70, 78);
+    GAME_SERVER_MANAGER.add_door_to_room("room_1", "main_lobby", 40, 78);
+    GAME_SERVER_MANAGER.add_door_to_room("room_2", "main_lobby", 40, 78);
 
     return GAME_SERVER_MANAGER;
   },
@@ -59,6 +61,7 @@ var GAME_SERVER_MANAGER = {
     room_obj.back_img = back_img;
     room_obj.start_position = starting_pos;
     room_obj.doors = [];
+    room_obj.users = [];
 
     GAME_SERVER_MANAGER.rooms[name] = room_obj;
   },
@@ -143,11 +146,12 @@ var GAME_SERVER_MANAGER = {
     var room_users = GAME_SERVER_MANAGER.rooms[old_room].users;
     // Find the user's position
     for(var i = 0; i < room_users.length; i++) {
-      if (room_users[i].id == user_id) {
+      if (room_users[i].id.localeCompare(user_id) == 0) {
         room_users[i].position = GAME_SERVER_MANAGER.rooms[new_room].start_position;
 
         GAME_SERVER_MANAGER.rooms[new_room].users.push({...room_users[i]});
         room_users.splice(i, 1);
+        break;
       }
     }
 
