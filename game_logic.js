@@ -8,8 +8,8 @@ var GAME_SERVER_MANAGER = {
     // Config default room structure
     GAME_SERVER_MANAGER.starting_room = "main_lobby";
     GAME_SERVER_MANAGER.add_room(GAME_SERVER_MANAGER.starting_room, "imgs/jainine-heese-lobby.png", 0.0);
-    GAME_SERVER_MANAGER.add_room("room_1", "imgs/jainine-heese-room1.png", 0.0);
-    GAME_SERVER_MANAGER.add_room("room_2", "imgs/jainine-heese-room2.png", 0.0);
+    GAME_SERVER_MANAGER.add_room("room_1", "imgs/jainine-hesee-room1.png", 0.0);
+    GAME_SERVER_MANAGER.add_room("room_2", "imgs/jainine-hesee-room2.png", 0.0);
 
     //DORS
     GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_1", -359, 38);
@@ -48,8 +48,8 @@ var GAME_SERVER_MANAGER = {
 
   add_door_to_room: function(starting_room, other_side_room, pos_x, pos_y) {
     GAME_SERVER_MANAGER.rooms[starting_room].doors.push({'to': other_side_room,
-                                                   'pos_x': pos_x,
-                                                   'pos_y':pos_y });
+                                                         'pos_x': pos_x,
+                                                         'pos_y':pos_y });
   },
 
   add_room: function(name, back_img, starting_pos) {
@@ -58,6 +58,7 @@ var GAME_SERVER_MANAGER = {
     room_obj.name = name;
     room_obj.back_img = back_img;
     room_obj.start_position = starting_pos;
+    room_obj.doors = [];
 
     GAME_SERVER_MANAGER.rooms[name] = room_obj;
   },
@@ -150,7 +151,7 @@ var GAME_SERVER_MANAGER = {
       }
     }
 
-    GAME_SERVER_MANAGER.room_users[user_id] = new_room;
+    GAME_SERVER_MANAGER.user_room_id[user_id] = new_room;
 
     return GAME_SERVER_MANAGER.rooms[new_room];
   }

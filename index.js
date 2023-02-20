@@ -152,6 +152,11 @@ function config() {
         }
       } else if (msg_obj.type.localeCompare("change_room") == 0) {
 
+        var new_room = GAME_MANAGER.move_chatroom(ws._user_id, GAME_MANAGER.user_room_id[ws._user_id], msg_obj.new_room);
+
+        ws.send(JSON.stringify({'type':'move_to_room',
+                                'new_room_id': msg_obj.new_room,
+                                'new_room': new_room}));
       } else if (msg_obj.type.localeCompare("updated_position") == 0) {
         // Update the position on the server, and then send the positions to the users
         // that are in teh same room, to their sockets
