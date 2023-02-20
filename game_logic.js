@@ -13,7 +13,7 @@ var GAME_SERVER_MANAGER = {
 
     // DOORS
     GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_1", -359, 78);
-    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_2", -70, 78);
+    GAME_SERVER_MANAGER.add_door_to_room("main_lobby", "room_2", -213, 78);
     GAME_SERVER_MANAGER.add_door_to_room("room_1", "main_lobby", 40, 78);
     GAME_SERVER_MANAGER.add_door_to_room("room_2", "main_lobby", 40, 78);
 
